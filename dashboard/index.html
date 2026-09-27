@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-gray-950 text-gray-100">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BreakPoint AI — C2 Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gray: {
+              950: '#0a0c10',
+              900: '#0f1117',
+              800: '#161b22',
+              700: '#21262d',
+              600: '#30363d',
+              400: '#8b949e',
+              300: '#c9d1d9',
+              100: '#f0f6fc',
+            },
+            red:   { 500: '#f85149', 400: '#ff7b72', 300: '#ffa198' },
+            green: { 500: '#3fb950', 400: '#56d364', 300: '#7ee787' },
+            cyan:  { 500: '#58a6ff', 400: '#79c0ff', 300: '#a5d6ff' },
+            amber: { 500: '#d29922', 400: '#e3b341', 300: '#f0c040' },
+            violet:{ 500: '#bc8cff', 400: '#d2a8ff', 300: '#e2c5ff' },
+          },
+          fontFamily: {
+            mono: ['"JetBrains Mono"', '"Fira Code"', 'ui-monospace', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0f1117; }
+    ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+    .glow-green  { text-shadow: 0 0 8px #3fb950; }
+    .glow-red    { text-shadow: 0 0 8px #f85149; }
+    .glow-cyan   { text-shadow: 0 0 8px #58a6ff; }
+    .pulse-dot::before {
+      content: '';
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-right: 8px;
+      vertical-align: middle;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    .pulse-dot.online::before  { background: #3fb950; box-shadow: 0 0 6px #3fb950; }
+    .pulse-dot.offline::before { background: #f85149; box-shadow: 0 0 6px #f85149; animation: none; }
+    .pulse-dot.idle::before    { background: #d29922; box-shadow: 0 0 6px #d29922; }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: .4; transform: scale(1.35); }
+    }
+    .score-ring { transition: stroke-dashoffset 0.7s cubic-bezier(.4,0,.2,1); }
+    .log-line { animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(4px); } to { opacity:1; transform: none; } }
+    .badge {
+      font-size: 0.65rem;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      vertical-align: middle;
+    }
+    .border-l-glow { box-shadow: -2px 0 8px rgba(88,166,255,0.25); }
+  </style>
+</head>
+<body class="bg-gray-950 min-h-screen">
+
+  <!-- ── Top Bar ─────────────────────────────────────────────── -->
+  <header class="border-b border-gray-700 bg-gray-900 px-6 py-3 flex items-center justify-between sticky top-0 z-20">
+    <div class="flex items-center gap-3">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f85149" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+      </svg>
+      <span class="text-sm font-semibold tracking-widest text-gray-100 uppercase">BreakPoint AI</span>
+      <span class="badge bg-red-500/15 text-red-400 border border-red-500/30">C2 DASHBOARD</span>
+    </div>
+    <div class="flex items-center gap-6 text-xs text-gray-400">
+      <span id="clock" class="tabular-nums text-gray-400"></span>
+      <div id="server-status" class="pulse-dot offline text-gray-300 text-xs font-medium">Connecting…</div>
+      <button id="btn-run" onclick="triggerTestRun()"
+        class="px-3 py-1.5 rounded bg-red-500/10 border border-red-500/40 text-red-400 text-xs font-semibold hover:bg-red-500/20 transition-colors">
+        ▶ RUN TESTS
+      </button>
+      <button id="btn-clear" onclick="clearLog()"
+        class="px-3 py-1.5 rounded bg-gray-700/60 border border-gray-600 text-gray-400 text-xs font-semibold hover:bg-gray-700 transition-colors">
+        CLR
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Main Grid ───────────────────────────────────────────── -->
+  <main class="p-5 grid grid-cols-12 gap-4">
+
+    <!-- Stats row -->
+    <div class="col-span-12 grid grid-cols-4 gap-4">
+      <div class="bg-gray-800 border border-gray-700 rounded-lg p-4">
+        <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">Total Events</div>
+        <div id="stat-total" class="text-2xl font-semibold text-cyan-400 glow-cyan tabular-nums">0</div>
+      </div>
+      <div class="bg-gray-800 border border-gray-700 rounded-lg p-4">
+        <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">PASS</div>
+        <div id="stat-pass" class="text-2xl font-semibold text-green-400 glow-green tabular-nums">0</div>
+      </div>
+      <div class="bg-gray-800 border border-gray-700 rounded-lg p-4">
+        <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">FAIL / VULN</div>
+        <div id="stat-fail" class="text-2xl font-semibold text-red-400 glow-red tabular-nums">0</div>
+      </div>
+      <div class="bg-gray-800 border border-gray-700 rounded-lg p-4">
+        <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">WARNINGS</div>
+        <div id="stat-warn" class="text-2xl font-semibold text-amber-400 tabular-nums">0</div>
+      </div>
+    </div>
+
+    <!-- Live Log — 8 cols -->
+    <section class="col-span-8 bg-gray-900 border border-gray-700 rounded-lg flex flex-col" style="height:520px;">
+      <div class="flex items-center justify-between px-4 py-2.5 border-b border-gray-700">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-red-500 inline-block"></span>
+          <span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>
+          <span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
+          <span class="text-xs text-gray-400 ml-2 font-semibold uppercase tracking-wider">Live Attack Log</span>
+        </div>
+        <div id="log-badge" class="text-xs text-gray-500">Awaiting stream…</div>
+      </div>
+      <div id="log-container" class="flex-1 overflow-y-auto p-3 space-y-0.5 text-xs font-mono"></div>
+    </section>
+
+    <!-- Right column — 4 cols -->
+    <aside class="col-span-4 flex flex-col gap-4">
+
+      <!-- Merge Confidence Score -->
+      <div class="bg-gray-900 border border-gray-700 rounded-lg p-5 flex flex-col items-center">
+        <div class="text-xs text-gray-400 uppercase tracking-wider mb-4">Merge Confidence Score</div>
+        <div class="relative" style="width:140px;height:140px;">
+          <svg viewBox="0 0 140 140" class="w-full h-full -rotate-90">
+            <circle cx="70" cy="70" r="56" fill="none" stroke="#21262d" stroke-width="10"/>
+            <circle id="score-ring" cx="70" cy="70" r="56" fill="none"
+              stroke="#3fb950" stroke-width="10" stroke-linecap="round"
+              stroke-dasharray="351.86"
+              stroke-dashoffset="351.86"
+              class="score-ring"/>
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <span id="score-value" class="text-3xl font-bold text-green-400 glow-green tabular-nums">0</span>
+            <span class="text-xs text-gray-500 mt-0.5">/ 100</span>
+          </div>
+        </div>
+        <div id="score-label" class="mt-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Awaiting Results</div>
+        <div class="w-full mt-4 grid grid-cols-3 gap-2 text-center">
+          <div>
+            <div class="text-xs text-gray-500">Fuzz</div>
+            <div id="score-fuzz" class="text-sm font-semibold text-violet-400">—</div>
+          </div>
+          <div>
+            <div class="text-xs text-gray-500">Concur.</div>
+            <div id="score-concur" class="text-sm font-semibold text-cyan-400">—</div>
+          </div>
+          <div>
+            <div class="text-xs text-gray-500">Patch</div>
+            <div id="score-patch" class="text-sm font-semibold text-amber-400">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Attack Surface -->
+      <div class="bg-gray-900 border border-gray-700 rounded-lg p-4">
+        <div class="text-xs text-gray-400 uppercase tracking-wider mb-3">Attack Surface</div>
+        <div class="space-y-2 text-xs">
+          <div class="flex justify-between items-center">
+            <span class="text-gray-400">POST /api/v1/transfer</span>
+            <span id="surface-transfer" class="badge bg-amber-500/15 text-amber-400 border border-amber-500/30">SCANNING</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-gray-400">Input Validation</span>
+            <span id="surface-validation" class="badge bg-gray-700 text-gray-400 border border-gray-600">—</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-gray-400">Race Condition</span>
+            <span id="surface-race" class="badge bg-gray-700 text-gray-400 border border-gray-600">—</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-gray-400">Auth Bypass</span>
+            <span id="surface-auth" class="badge bg-gray-700 text-gray-400 border border-gray-600">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Agents -->
+      <div class="bg-gray-900 border border-gray-700 rounded-lg p-4">
+        <div class="text-xs text-gray-400 uppercase tracking-wider mb-3">Active Subagents</div>
+        <div class="space-y-2 text-xs">
+          <div class="flex items-center justify-between">
+            <span class="pulse-dot idle text-gray-300">Subagent A — Concurrency</span>
+            <span id="agent-a-status" class="text-gray-500">idle</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="pulse-dot idle text-gray-300">Subagent B — Fuzzing</span>
+            <span id="agent-b-status" class="text-gray-500">idle</span>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- Timeline bar -->
+    <div class="col-span-12 bg-gray-900 border border-gray-700 rounded-lg p-4">
+      <div class="text-xs text-gray-400 uppercase tracking-wider mb-3">Event Timeline</div>
+      <div id="timeline" class="flex gap-1 flex-wrap"></div>
+    </div>
+
+  </main>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

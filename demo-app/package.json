@@ -1,0 +1,17 @@
+{
+  "name": "demo-app",
+  "version": "1.0.0",
+  "description": "Vulnerable microservice target for BreakPoint AI testing",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "jest --detectOpenHandles"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.4"
+  }
+}

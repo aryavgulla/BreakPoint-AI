@@ -1,0 +1,16 @@
+{
+  "$schema": "https://breakpoint-ai.dev/schema/config.json",
+  "testRunner": "jest",
+  "specFile": "openapi.json",
+  "extensions": [
+    ".js",
+    ".ts",
+    ".mjs",
+    ".cjs"
+  ],
+  "exclude": [],
+  "maxRounds": 5,
+  "modelId": "ibm/granite-3-3-8b-instruct",
+  "outputDir": ".breakpoint/audit-reports",
+  "minSeverity": "low"
+}

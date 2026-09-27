@@ -1,0 +1,30 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Transfer API Service",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/v1/transfer": {
+      "post": {
+        "summary": "Transfer funds between users",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "senderId": { "type": "string" },
+                  "recipientId": { "type": "string" },
+                  "amount": { "type": "number", "minimum": 0.01 }
+                },
+                "required": ["senderId", "recipientId", "amount"]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

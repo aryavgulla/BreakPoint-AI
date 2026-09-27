@@ -1,0 +1,34 @@
+{
+  "name": "breakpoint-ai",
+  "version": "1.0.0",
+  "description": "BreakPoint AI — autonomous security auditor. Run it against any project, anywhere on your machine.",
+  "type": "commonjs",
+  "bin": {
+    "breakpoint": "./bin/breakpoint.js"
+  },
+  "main": "./lib/index.js",
+  "files": [
+    "bin",
+    "lib",
+    "public",
+    "README.md"
+  ],
+  "scripts": {
+    "start": "node bin/breakpoint.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "chokidar": "^3.6.0",
+    "express": "^4.19.2"
+  },
+  "keywords": [
+    "security",
+    "fuzzing",
+    "red-team",
+    "watsonx",
+    "ai"
+  ],
+  "license": "MIT"
+}

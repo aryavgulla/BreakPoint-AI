@@ -1,0 +1,83 @@
+# .gitignore
+node_modules/
+*/node_modules/
+**/node_modules/
+cli/node_modules/
+dashboard/node_modules/
+mcp-server/node_modules/
+demo-app/node_modules/
+demo-app-2/node_modules/
+demo-app-3/node_modules/
+demo-app-4/node_modules/
+.env
+*.log
+tests/generated_*
+# ------------------------------------------------------------------------------
+# Security & Credentials (CRITICAL - Keeps API keys out of GitHub)
+# ------------------------------------------------------------------------------
+*.env
+*.env.*
+*.pem
+*.key
+*.pfx
+*api_key*
+*apikey*
+groq api key.txt
+
+# ------------------------------------------------------------------------------
+# Dependencies & Build Outputs
+# ------------------------------------------------------------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+dist/
+build/
+out/
+.next/
+
+# ------------------------------------------------------------------------------
+# Runtime Logs & Temporary Output
+# ------------------------------------------------------------------------------
+logs
+*.log
+.breakpoint/
+audit-reports/
+coverage/
+.nyc_output/
+
+# ------------------------------------------------------------------------------
+# Operating System & IDE Garbage
+# ------------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ------------------------------------------------------------------------------
+# Python & Virtual Environments (for Python demo apps/tests)
+# ------------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+.pytest_cache/
+
+

@@ -1,0 +1,17 @@
+{
+  "name": "breakpoint-dashboard",
+  "version": "2.0.0",
+  "description": "BreakPoint AI Command & Control Dashboard — React + Express SSE",
+  "main": "server.js",
+  "scripts": {
+    "start":   "node server.js",
+    "dev:api": "node server.js",
+    "dev:ui":  "cd client && npm run dev",
+    "build":   "cd client && npm run build",
+    "dev":     "node server.js"
+  },
+  "dependencies": {
+    "chokidar": "^3.6.0",
+    "express":  "^4.19.2"
+  }
+}
